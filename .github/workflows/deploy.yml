@@ -1,29 +1,47 @@
-name: CI/CD Pipeline
+name: Deploy to EC2
+
 on:
   push:
-    branches: [ master ]
-jobs:       
+    branches:
+      - master  # Trigger the workflow only when there is a push to the master branch
+
+jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1
-    - name: Checkout to repo
+    - name: Checkout code
       uses: actions/checkout@v2
 
-      # Step 2
-    - name: Set AWS credentials
+    - name: Set up Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-      # Step 3
-    - name: Create CodeDeploy Deployment
-      id: deploy
+    - name: Deploy to AWS CodeDeploy
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Create deployment package
+      run: |
+        zip -r my-node-app.zip .  # Create a ZIP file of the application
+
+    - name: Push to S3
+      run: |
+        aws s3 cp my-node-app.zip s3://node-simple/app/my-node-app.zip  # Upload the ZIP file to S3
+
+    - name: Create a new deployment
       run: |
         aws deploy create-deployment \
-        --application-name Git_Application  \
-        --deployment-group-name development_group \
-        --deployment-config-name CodeDeployDefault.OneAtATime \
-        --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+          --application-name Git_Application \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --deployment-group-name development_group \
+          --s3-location bucket=node-simple,key=app/my-node-app.zip,bundleType=zip
