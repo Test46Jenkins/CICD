@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master  # Trigger the workflow only when there is a push to the master branch
+      - cicd  # Trigger the workflow only when there is a push to the master branch
 
 jobs:
   deploy:
