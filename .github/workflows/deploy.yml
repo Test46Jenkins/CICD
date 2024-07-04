@@ -1,4 +1,5 @@
 
+
 name: Deploy to EC2
 
 on:
@@ -37,47 +38,8 @@ jobs:
 
     - name: Create a new deployment
       run: |
-       name: Deploy to EC2
-
-on:
-  push:
-    branches:
-      - master  # Trigger the workflow only when there is a push to the master branch
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js 20
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Deploy to AWS CodeDeploy
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Push to S3
-      run: |
-        aws s3 cp --recursive . s3://your-bucket-name/your-app/
-
-    - name: Create a new deployment
-      run: |
         aws deploy create-deployment \
-          --application-name your-app-name \
+          --application-name Git_Application \
           --deployment-config-name CodeDeployDefault.OneAtATime \
-          --deployment-group-name your-deployment-group-name \
-          --s3-location bucket=your-bucket-name,key=your-app/,bundleType=zip
-
+          --deployment-group-name development_group \
+          --s3-location bucket=node-simple,key=your-app/,bundleType=zip
