@@ -40,4 +40,4 @@ jobs:
           --application-name Git_Application \
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --deployment-group-name development_group \
-          --s3-location bucket=node-simple,key=your-app/,bundleType=zip
+          --s3-location bucket=node-simple,key=app/,bundleType=zip
